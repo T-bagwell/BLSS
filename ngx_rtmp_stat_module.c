@@ -456,13 +456,18 @@ ngx_rtmp_stat_live(ngx_http_request_t *r, ngx_chain_t ***lll,
 
             nclients = 0;
             codec = NULL;
-            for (i = 0; i < 2; ++ i) {
+            for (i = NGX_RTMP_LIVE_RTMP_TYPE; i < NGX_RTMP_LIVE_MAX_TYPE; ++ i) {
                 for (ctx = stream->ctx[i]; ctx; ctx = ctx->next, ++nclients) {  // TODO
                     s = ctx->session;
                     if (slcf->stat & NGX_RTMP_STAT_CLIENTS) {
                         NGX_RTMP_STAT_L("<client>");
 
                         ngx_rtmp_stat_client(r, lll, s);
+
+                        NGX_RTMP_STAT_L("<protocol>");
+                        NGX_RTMP_STAT(buf, ngx_snprintf(buf, sizeof(buf),
+                                      "%s", i == NGX_RTMP_LIVE_RTMP_TYPE ? "rtmp" : "http flv") - buf);
+                        NGX_RTMP_STAT_L("</protocol>");
 
                         NGX_RTMP_STAT_L("<dropped>");
                         NGX_RTMP_STAT(buf, ngx_snprintf(buf, sizeof(buf),

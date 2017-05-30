@@ -189,12 +189,6 @@ typedef struct {
 
 #define NGX_RTMP_DEFAULT_CHUNK_SIZE     128
 
-#define NGX_NONE_RELAY                  0
-#define NGX_CLUSTER_RELAY               1
-#define NGX_REMOTE_RELAY                2
-#define NGX_LOCAL_RELAY                 3
-#define	NGX_ERROR_RELAY					4
-
 #define NGX_PROTO_TYPE_UNKNOWN          0
 #define NGX_PROTO_TYPE_RTMP             1
 #define NGX_PROTO_TYPE_RTMP_PULL        2
@@ -203,6 +197,9 @@ typedef struct {
 #define NGX_PROTO_TYPE_HLS_M3U8_PULL    5
 #define NGX_PROTO_TYPE_HTTP_FLV_PULL    4
 
+#define NGX_RTMP_LIVE_RTMP_TYPE         0
+#define NGX_RTMP_LIVE_HTTP_FLV_TYPE     1
+#define NGX_RTMP_LIVE_MAX_TYPE          2
 
 /* RTMP message types */
 #define NGX_RTMP_MSG_CHUNK_SIZE         1

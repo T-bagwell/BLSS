@@ -380,7 +380,7 @@ ngx_rtmp_live_set_status(ngx_rtmp_session_t *s, ngx_chain_t *control,
 
         ctx->stream->active = active;
 
-        for (pctx = ctx->stream->ctx[0]; pctx; pctx = pctx->next) {
+        for (pctx = ctx->stream->ctx[NGX_RTMP_LIVE_RTMP_TYPE]; pctx; pctx = pctx->next) {
             ngx_rtmp_live_set_status(pctx->session, control, status,
                                      nstatus, active);
         }
@@ -658,7 +658,7 @@ ngx_rtmp_live_close_stream(ngx_rtmp_session_t *s, ngx_rtmp_close_stream_t *v)
     if (ctx->publishing) {
         ctx->stream->pctx = NULL;
     } else {
-        for (cctx = &ctx->stream->ctx[0]; *cctx; cctx = &(*cctx)->next) {
+        for (cctx = &ctx->stream->ctx[NGX_RTMP_LIVE_RTMP_TYPE]; *cctx; cctx = &(*cctx)->next) {
             if (*cctx == ctx) {
                 *cctx = ctx->next;
                 break;
@@ -675,7 +675,7 @@ ngx_rtmp_live_close_stream(ngx_rtmp_session_t *s, ngx_rtmp_close_stream_t *v)
                              "status", "Stop publishing");
         if (!lacf->idle_streams) {
             // close both rtmp and http flv connection.
-            for (n = 0; n < 2; ++ n) {
+            for (n = NGX_RTMP_LIVE_RTMP_TYPE; n < NGX_RTMP_LIVE_MAX_TYPE; ++ n) {
                 for (pctx = ctx->stream->ctx[n]; pctx; pctx = pctx->next) {
                     ss = pctx->session;
                     ngx_log_debug0(NGX_LOG_DEBUG_RTMP, ss->connection->log, 0,
@@ -686,7 +686,9 @@ ngx_rtmp_live_close_stream(ngx_rtmp_session_t *s, ngx_rtmp_close_stream_t *v)
         }
     }
 
-    if (ctx->stream->ctx[0] || ctx->stream->ctx[1] || ctx->stream->pctx) {
+    if (ctx->stream->ctx[NGX_RTMP_LIVE_RTMP_TYPE] ||
+        ctx->stream->ctx[NGX_RTMP_LIVE_HTTP_FLV_TYPE] ||
+        ctx->stream->pctx) {
         ctx->stream = NULL;
         goto next;
     }
@@ -886,8 +888,8 @@ ngx_rtmp_live_broadcast(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
 
     /* broadcast to all subscribers */
 
-    for (n = 0; n < 2; ++ n) {
-        if (n == 1 && !hacf->http_flv) {
+    for (n = NGX_RTMP_LIVE_RTMP_TYPE; n < NGX_RTMP_LIVE_MAX_TYPE; ++ n) {
+        if (n == NGX_RTMP_LIVE_HTTP_FLV_TYPE && !hacf->http_flv) {
             continue;
         }
 
@@ -897,7 +899,7 @@ ngx_rtmp_live_broadcast(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
 
         meta = NULL;
         if (codec_ctx) {
-            meta = (n == 0 ? codec_ctx->meta : codec_ctx->meta_flv);
+            meta = (n == NGX_RTMP_LIVE_RTMP_TYPE ? codec_ctx->meta : codec_ctx->meta_flv);
         }
 
         for (pctx = ctx->stream->ctx[n]; pctx; pctx = pctx->next) {
