@@ -735,6 +735,46 @@ ngx_rtmp_is_codec_header(ngx_chain_t *in)
 }
 
 
+static ngx_inline ngx_uint_t
+ngx_rtmp_get_remote_port(ngx_rtmp_session_t *s)
+{
+    ngx_uint_t            port;
+    struct sockaddr_in   *sin;
+#if (NGX_HAVE_INET6)
+    struct sockaddr_in6  *sin6;
+#endif
+
+    if (s->connection != NULL &&
+        s->connection->sockaddr != NULL) {
+
+        switch (s->connection->sockaddr->sa_family) {
+
+#if (NGX_HAVE_INET6)
+            case AF_INET6:
+                sin6 = (struct sockaddr_in6 *) s->connection->sockaddr;
+                port = ntohs(sin6->sin6_port);
+                break;
+#endif
+
+#if (NGX_HAVE_UNIX_DOMAIN)
+            case AF_UNIX:
+                port = 0;
+                break;
+#endif
+
+            default: /* AF_INET */
+                sin = (struct sockaddr_in *) s->connection->sockaddr;
+                port = ntohs(sin->sin_port);
+                break;
+        }
+    } else {
+        port = 0;
+    }
+
+    return port;
+}
+
+
 extern ngx_rtmp_bandwidth_t                 ngx_rtmp_bw_out;
 extern ngx_rtmp_bandwidth_t                 ngx_rtmp_bw_in;
 

@@ -193,6 +193,47 @@ ngx_rtmp_log_var_remote_addr_getdata(ngx_rtmp_session_t *s, u_char *buf,
 
 
 static size_t
+ngx_rtmp_log_var_remote_port_getlen(ngx_rtmp_session_t *s,
+    ngx_rtmp_log_op_t *op)
+{
+    return NGX_INT_T_LEN;
+}
+
+
+static u_char *
+ngx_rtmp_log_var_remote_port_getdata(ngx_rtmp_session_t *s, u_char *buf,
+    ngx_rtmp_log_op_t *op)
+{
+    return ngx_sprintf(buf, "%ui", ngx_rtmp_get_remote_port(s));
+}
+
+
+static size_t
+ngx_rtmp_log_var_service_getlen(ngx_rtmp_session_t *s,
+    ngx_rtmp_log_op_t *op)
+{
+    ngx_rtmp_core_svi_conf_t    *csicf;
+
+    csicf = ngx_rtmp_get_module_svi_conf(s, ngx_rtmp_core_module);
+
+    return csicf->name.len;
+}
+
+
+static u_char *
+ngx_rtmp_log_var_service_getdata(ngx_rtmp_session_t *s, u_char *buf,
+    ngx_rtmp_log_op_t *op)
+{
+    ngx_rtmp_core_svi_conf_t    *csicf;
+
+    csicf = ngx_rtmp_get_module_svi_conf(s, ngx_rtmp_core_module);
+
+    return ngx_cpymem(buf, csicf->name.data,
+                           csicf->name.len);
+}
+
+
+static size_t
 ngx_rtmp_log_var_msec_getlen(ngx_rtmp_session_t *s,
     ngx_rtmp_log_op_t *op)
 {
@@ -397,6 +438,16 @@ static ngx_rtmp_log_var_t ngx_rtmp_log_vars[] = {
     { ngx_string("remote_addr"),
       ngx_rtmp_log_var_remote_addr_getlen,
       ngx_rtmp_log_var_remote_addr_getdata,
+      0 },
+
+    { ngx_string("remote_port"),
+      ngx_rtmp_log_var_remote_port_getlen,
+      ngx_rtmp_log_var_remote_port_getdata,
+      0 },
+
+    { ngx_string("service"),
+      ngx_rtmp_log_var_service_getlen,
+      ngx_rtmp_log_var_service_getdata,
       0 },
 
     { ngx_string("app"),
